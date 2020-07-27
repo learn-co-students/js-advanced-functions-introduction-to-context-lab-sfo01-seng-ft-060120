@@ -17,31 +17,70 @@ const createEmployeeRecords = (arr) => {
 }
 
 const createTimeInEvent = (employee, date) => {
-    // let dateObj = new Date(date)
-    // console.log(dateObj)
 
     let dateSplit = date.split(' ')
-
-    // let timeIn = new TimeIn(dateSplit[0], dateSplit[1])
-
-    let TimeIn = {
+    let timeIn = {
+        type: "TimeIn",
         date: dateSplit[0],
         hour: parseInt(dateSplit[1])
     }
+    employee.timeInEvents.push(timeIn)
 
-    employee.timeInEvents.push(TimeIn)
-
-    console.log(employee.timeInEvents)
-
-    console.log(employee.timeInEvents[0].type)
-
-
-    return employee.timeInEvents
+    return employee
 }
 
-// class TimeIn {
-//     constructor(date, hour) {
-//       this.date = date;
-//       this.hour = hour;
-//     }
-// }
+const createTimeOutEvent = (employee, date) => {
+    let dateSplit = date.split(' ')
+    let timeOut = {
+        type: "TimeOut",
+        date: dateSplit[0],
+        hour: parseInt(dateSplit[1])
+    }
+    employee.timeOutEvents.push(timeOut)
+
+    return employee
+}
+
+const hoursWorkedOnDate = (employee, date) => {
+    
+    let timeIn = employee.timeInEvents.find(event => event.date === date).hour
+    let timeOut = employee.timeOutEvents.find(event => event.date === date).hour
+
+    if (timeIn && timeOut) {
+        return (timeOut - timeIn) / 100
+    }
+    else {
+        return null
+    }
+    
+}
+
+const wagesEarnedOnDate = (employee, date) => {
+    let timeIn = employee.timeInEvents.find(event => event.date === date).hour
+    let timeOut = employee.timeOutEvents.find(event => event.date === date).hour
+
+    let hoursWorked = (timeOut - timeIn) / 100
+    return hoursWorked * employee.payPerHour
+}
+
+const allWagesFor = (employee) => {
+    let totalWages = employee.timeInEvents.reduce(function(total, event){
+        let dayWage = wagesEarnedOnDate(employee, event.date)
+        return dayWage + total
+    }, 0)
+    return totalWages
+}
+
+const calculatePayroll = (employees) => {
+    let payrollTotal = employees.reduce(function(total, employee){
+        return allWagesFor(employee) + total
+    }, 0)
+    return payrollTotal
+}
+
+const findEmployeeByFirstName = (employees, name) => {
+    return employees.find(employee => {
+        employee.firstName === name
+        return employee
+    })
+}
